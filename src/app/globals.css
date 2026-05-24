@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --app-bg: #f8f8f8;
+  --app-text: #111827;
+  --app-text-muted: #6b7280;
+  --app-primary: #22c55e;
+  --app-card: #ffffff;
+  --app-border: #e5e7eb;
+  --app-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+}
+
+@theme inline {
+  --color-app-bg: var(--app-bg);
+  --color-app-text: var(--app-text);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-primary: var(--app-primary);
+  --color-app-card: var(--app-card);
+  --color-app-border: var(--app-border);
+  --font-sans: var(--font-inter);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
