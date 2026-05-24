@@ -276,8 +276,8 @@ export default function Home() {
   const bottomPadding = items.length > 0 ? 230 : 155;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#e2f7ea,transparent_60%)]">
-      <div className="mx-auto flex h-screen w-full max-w-[430px] flex-col bg-app-bg/85 shadow-[0_0_50px_rgba(0,0,0,0.06)] border-x border-app-border/40 relative overflow-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,#e2f7ea,transparent_60%)]">
+      <div className="mx-auto flex h-screen w-full max-w-[430px] min-w-0 flex-col bg-app-bg/85 shadow-[0_0_50px_rgba(0,0,0,0.06)] border-x border-app-border/40 relative overflow-hidden">
         
         {/* Sleek App Header */}
         <header className="sticky top-0 z-20 bg-app-bg/80 backdrop-blur-md border-b border-app-border/20 flex flex-col">
@@ -314,7 +314,7 @@ export default function Home() {
               </motion.button>
             </div>
             
-            <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5 w-full min-w-0">
               {moodPresets.map((mood) => (
                 <SuggestionChip
                   key={mood.id}
@@ -335,7 +335,7 @@ export default function Home() {
         {/* Chat Feed */}
         <main
           ref={messagesRef}
-          className="flex-1 overflow-y-auto no-scrollbar scroll-smooth px-4 pt-3 space-y-4"
+          className="flex-1 overflow-y-auto no-scrollbar scroll-smooth px-4 pt-3 space-y-4 min-w-0"
           style={{ paddingBottom: `calc(${bottomPadding}px + env(safe-area-inset-bottom))` }}
         >
           <motion.div
@@ -348,7 +348,7 @@ export default function Home() {
               <motion.div
                 key={message.id}
                 variants={messageVariants}
-                className="space-y-2.5"
+                className="space-y-2.5 min-w-0 w-full"
               >
                 {message.sender === "ai" ? (
                   <AIMessage
@@ -545,7 +545,7 @@ export default function Home() {
           </AnimatePresence>
 
           {/* Suggestions Tray */}
-          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5 w-full min-w-0">
             {quickSuggestions.map((suggestion) => (
               <SuggestionChip
                 key={suggestion}
