@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SendHorizontal, ShoppingBag, Mic, Sparkles, CheckCircle2 } from "lucide-react";
-
 import { AIMessage } from "@/components/chat/AIMessage";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { ProductCarousel } from "@/components/products/ProductCarousel";
@@ -26,6 +25,7 @@ import { getSmartRecommendations } from "@/services/recommendation";
 export default function Home() {
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [typingMessage, setTypingMessage] = useState("Khwaaish is thinking...");
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   const { messages, addMessage, isTyping, setTyping } = useChatStore();
@@ -139,6 +139,22 @@ export default function Home() {
     });
 
     setInput("");
+    
+    // Choose dynamic thinking message based on input
+    const lowerInput = trimmed.toLowerCase();
+    let msg = "Khwaaish is thinking...";
+    if (lowerInput.includes("sugar")) msg = "Finding sweeteners & sugar options... 🍯";
+    else if (lowerInput.includes("oil")) msg = "Checking quick-delivery cooking oils... 🫒";
+    else if (lowerInput.includes("milk") || lowerInput.includes("dairy")) msg = "Checking quick-delivery dairy... 🥛";
+    else if (lowerInput.includes("juice") || lowerInput.includes("drink")) msg = "Looking for refreshing drinks... 🍹";
+    else if (lowerInput.includes("dinner")) msg = "Checking dinner meal options... 🍲";
+    else if (lowerInput.includes("breakfast")) msg = "Finding breakfast cereals & oats... 🥣";
+    else if (lowerInput.includes("frozen") || lowerInput.includes("paratha")) msg = "Checking quick frozen foods... ❄️";
+    else if (lowerInput.includes("mango") || lowerInput.includes("fruit")) msg = "Finding fresh mango picks... 🥭";
+    else if (lowerInput.includes("chili") || lowerInput.includes("spice") || lowerInput.includes("seasoning")) msg = "Looking for pizza spices & seasonings... 🌶️";
+    else msg = `Looking for "${trimmed}" near you... 🔍`;
+    setTypingMessage(msg);
+
     setTyping(true);
 
     try {
@@ -485,7 +501,7 @@ export default function Home() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <TypingAnimation />
+                  <TypingAnimation message={typingMessage} />
                 </motion.div>
               ) : null}
             </AnimatePresence>
