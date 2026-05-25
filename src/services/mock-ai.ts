@@ -78,20 +78,70 @@ export const parseLocalIntent = (text: string): Intent => {
     intent = "CART_ACTION";
     cartAction = { type: "CLEAR", productId: null, quantity: null };
     reasoning = "I've cleared all the items from your shopping cart.";
-  } else if (lower.includes("add") || lower.includes("put") || lower.includes("buy") || lower.includes("shop")) {
+  } else if (lower.includes("remove") || lower.includes("delete") || lower.includes("drop") || lower.includes("take off")) {
     intent = "CART_ACTION";
-    // Find matching product in catalog
-    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase()));
+    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase())) ||
+                           products.find((p) => categories.includes(p.category));
     if (matchedProduct) {
-      // Check if user specified a quantity
+      cartAction = { type: "REMOVE", productId: matchedProduct.id, quantity: null };
+      reasoning = `Removed ${matchedProduct.title} from your cart.`;
+    } else {
+      intent = "CHAT";
+      reasoning = "Which item should I remove from your cart?";
+    }
+  } else if (
+    lower.includes("keep only") ||
+    /\bset\b/.test(lower) ||
+    /\bmake\b/.test(lower) ||
+    /\bupdate\b/.test(lower) ||
+    /\bchange\b/.test(lower)
+  ) {
+    intent = "CART_ACTION";
+    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase())) ||
+                           products.find((p) => categories.includes(p.category));
+    if (matchedProduct) {
+      const qtyMatch = lower.match(/(\d+)/);
+      const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+      cartAction = { type: "UPDATE_QTY", productId: matchedProduct.id, quantity };
+      reasoning = `Set quantity of ${matchedProduct.title} to ${quantity}.`;
+    } else {
+      intent = "CHAT";
+      reasoning = "Which product's quantity would you like me to update?";
+    }
+  } else if (
+    lower.includes("add") ||
+    lower.includes("put") ||
+    lower.includes("buy") ||
+    lower.includes("shop") ||
+    lower.includes("increase") ||
+    lower.includes("more") ||
+    lower.includes("extra")
+  ) {
+    intent = "CART_ACTION";
+    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase())) ||
+                           products.find((p) => categories.includes(p.category));
+    if (matchedProduct) {
       const qtyMatch = lower.match(/(\d+)\s+(?:pack|bottle|box|pc|unit)?s?\s*of/);
-      const qtyMatch2 = lower.match(/add\s+(\d+)/);
-      const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : (qtyMatch2 ? parseInt(qtyMatch2[1], 10) : 1);
+      const qtyMatch2 = lower.match(/(?:add|buy|put|increase|more)\s+(\d+)/);
+      const qtyMatch3 = lower.match(/(\d+)\s+(?:more|extra)/);
+      const qtyMatch4 = lower.match(/(\d+)/);
+      
+      let quantity = 1;
+      if (qtyMatch) {
+        quantity = parseInt(qtyMatch[1], 10);
+      } else if (qtyMatch2) {
+        quantity = parseInt(qtyMatch2[1], 10);
+      } else if (qtyMatch3) {
+        quantity = parseInt(qtyMatch3[1], 10);
+      } else if (lower.includes("one more") || lower.includes("a pack of") || lower.includes("a bottle of")) {
+        quantity = 1;
+      } else if (qtyMatch4) {
+        quantity = parseInt(qtyMatch4[1], 10);
+      }
       
       cartAction = { type: "ADD", productId: matchedProduct.id, quantity };
       reasoning = `Added ${matchedProduct.title} (x${quantity}) to your shopping cart.`;
     } else {
-      // Find by category if no direct product matched
       const matchedCat = categories[0];
       const matchedProductByCat = matchedCat ? products.find((p) => p.category === matchedCat) : null;
       if (matchedProductByCat) {
@@ -101,28 +151,6 @@ export const parseLocalIntent = (text: string): Intent => {
         intent = "CHAT";
         reasoning = "I'd love to add that to your cart! Which specific product would you like me to add?";
       }
-    }
-  } else if (lower.includes("remove") || lower.includes("delete") || lower.includes("drop") || lower.includes("take off")) {
-    intent = "CART_ACTION";
-    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase()));
-    if (matchedProduct) {
-      cartAction = { type: "REMOVE", productId: matchedProduct.id, quantity: null };
-      reasoning = `Removed ${matchedProduct.title} from your cart.`;
-    } else {
-      intent = "CHAT";
-      reasoning = "Which item should I remove from your cart?";
-    }
-  } else if (lower.includes("increase") || lower.includes("decrease") || lower.includes("update") || lower.includes("more") || lower.includes("less") || lower.includes("quantity") || lower.includes("qty")) {
-    intent = "CART_ACTION";
-    const matchedProduct = products.find((p) => lower.includes(p.title.toLowerCase()));
-    if (matchedProduct) {
-      const qtyMatch = lower.match(/(\d+)/);
-      const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : 2;
-      cartAction = { type: "UPDATE_QTY", productId: matchedProduct.id, quantity };
-      reasoning = `Updated quantity for ${matchedProduct.title} to ${quantity}.`;
-    } else {
-      intent = "CHAT";
-      reasoning = "Which product's quantity would you like me to adjust?";
     }
   } else if (/\b(hi|hello|hey|greetings)\b/i.test(lower) || lower.includes("who are you")) {
     intent = "CHAT";

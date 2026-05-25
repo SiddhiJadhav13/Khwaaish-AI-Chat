@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { BudgetTracker } from "@/components/recommendation/BudgetTracker";
 import { moodPresets, quickSuggestions, products } from "@/data/mock";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
-import { buildAiResponse, buildWelcomeMessage } from "@/services/mock-ai";
+import { buildAiResponse, buildWelcomeMessage, parseLocalIntent } from "@/services/mock-ai";
 import { useCartStore } from "@/store/cart";
 import { useChatStore } from "@/store/chat";
 import { useUIStore } from "@/store/ui";
@@ -23,6 +23,7 @@ import { semanticSearch } from "@/services/semantic-search";
 import { getSmartRecommendations } from "@/services/recommendation";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [typingMessage, setTypingMessage] = useState("Khwaaish is thinking...");
@@ -35,6 +36,7 @@ export default function Home() {
   useAutoScroll(messagesRef, [messages.length, isTyping]);
 
   useEffect(() => {
+    setMounted(true);
     if (messages.length === 0) {
       addMessage(buildWelcomeMessage());
     }
@@ -269,7 +271,33 @@ export default function Home() {
       
       // Fallback: local keyword parsing
       setTimeout(() => {
+        const intent = parseLocalIntent(trimmed);
+        
+        // Execute cart actions locally on failure fallback
+        let cartActionSummary = "";
+        if (intent.intent === "CART_ACTION" && intent.cartAction) {
+          const { type, productId, quantity } = intent.cartAction;
+          const matchedProduct = products.find((p) => p.id === productId);
+
+          if (type === "ADD" && matchedProduct) {
+            addItem(matchedProduct, quantity || 1);
+            cartActionSummary = `Added ${matchedProduct.title} (x${quantity || 1}) to cart`;
+          } else if (type === "REMOVE" && matchedProduct) {
+            removeItem(matchedProduct.id);
+            cartActionSummary = `Removed ${matchedProduct.title} from cart`;
+          } else if (type === "UPDATE_QTY" && matchedProduct) {
+            updateQuantity(matchedProduct.id, quantity || 0);
+            cartActionSummary = `Set quantity of ${matchedProduct.title} to ${quantity}`;
+          } else if (type === "CLEAR") {
+            clear();
+            cartActionSummary = "Cleared all items from cart";
+          }
+        }
+
         const mockResult = buildAiResponse(trimmed, activeMood);
+        if (cartActionSummary) {
+          mockResult.cartActionSummary = cartActionSummary;
+        }
         
         // Match mock outputs to semantic searches for robust visual search results
         const fallbackSearch = semanticSearch(trimmed, 4);
@@ -290,6 +318,14 @@ export default function Home() {
   };
 
   const bottomPadding = items.length > 0 ? 230 : 155;
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,#e2f7ea,transparent_60%)] flex items-center justify-center">
+        <div className="text-sm font-bold text-app-text-muted animate-pulse">Loading Khwaaish...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,#e2f7ea,transparent_60%)]">

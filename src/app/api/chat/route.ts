@@ -73,9 +73,9 @@ Your output MUST be a valid JSON object matching this schema:
 }
 
 Guidelines:
-1. If the user wants to add an item (e.g., "add oat milk to cart"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "ADD", "productId": "milk-5", "quantity": 1 }, and explain it in the "reasoning".
-2. If the user wants to remove an item (e.g., "remove full cream milk"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "REMOVE", "productId": "milk-3", "quantity": null }.
-3. If the user wants to change quantity (e.g., "increase oats quantity" or "make eggs quantity 2"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "UPDATE_QTY", "productId": "oats-1", "quantity": 2 }.
+1. If the user wants to add items, increment quantity, or add more (e.g., "add oat milk to cart", "add 2 milk", "increase milk", "one more milk", "extra milk"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "ADD", "productId": "milk-5", "quantity": 1 } (or the specific count specified to add), and explain it in the "reasoning".
+2. If the user wants to remove an item completely (e.g., "remove full cream milk", "delete bread"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "REMOVE", "productId": "milk-3", "quantity": null }, and explain in "reasoning".
+3. If the user wants to set, change, replace, or update the target total quantity of a product in the cart to a specific absolute value (e.g., "make quantity 4", "set milk to 3", "keep only 2", "update milk quantity to 5", "change milk to 1", "make quantity of milk 4"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "UPDATE_QTY", "productId": "milk-3", "quantity": 4 } (set "quantity" to the exact absolute target number they specified), and explain in "reasoning".
 4. If the user wants to clear the cart (e.g., "clear my cart"), set "intent" to "CART_ACTION", "cartAction" to: { "type": "CLEAR", "productId": null, "quantity": null }.
 5. If the user is searching for items (e.g., "healthy breakfast under 200" or "cheap snacks"), set "intent" to "SEARCH". Extract appropriate search criteria. E.g., for "healthy breakfast under 200", set "categories": ["milk", "eggs", "oats", "cereal"], "dietaryTags": ["healthy"], "maxPrice": 200.
 6. If the user is just saying hello or asking general questions, set "intent" to "CHAT" and provide a warm customer service response in "reasoning".
